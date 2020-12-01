@@ -10,7 +10,11 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController : ControllerBase
+    // public class UsersController : ControllerBase
+
+    // inherit from the baseapicontroller classswe created to code reuse
+        public class UsersController : BaseApiController
+
     {
         private readonly DataContext _context;
         public UsersController(DataContext context)
