@@ -2,7 +2,9 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { ToastrModule, ToastrService } from 'ngx-toastr';
-
+import { TabsModule } from 'ngx-bootstrap/tabs';
+import { NgxGalleryModule } from '@kolkov/ngx-gallery';
+ 
 @NgModule({
   declarations: [],
   imports: [
@@ -11,11 +13,16 @@ import { ToastrModule, ToastrService } from 'ngx-toastr';
     ToastrModule.forRoot({
       timeOut: 1000,
       positionClass: 'toast-bottom-right'
-    })
+    }),
+    TabsModule.forRoot(),
+    NgxGalleryModule
+
   ],
   exports: [
     BsDropdownModule,
-    ToastrModule 
+    ToastrModule,
+    TabsModule,
+    NgxGalleryModule
   ]
 })
 export class SharedModule { }
