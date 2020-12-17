@@ -41,8 +41,9 @@ currentUser$ = this.currentUserSource.asObservable();
                    const user = response;
 
               if(user){
-                localStorage.setItem('user', JSON.stringify(user));
-                this.currentUserSource.next(this.user);
+                // localStorage.setItem('user', JSON.stringify(user));
+                // this.currentUserSource.next(this.user);
+                this.setCurrentUser(this.user);
               }
               return user;
             })
@@ -54,6 +55,7 @@ currentUser$ = this.currentUserSource.asObservable();
 
 
     setCurrentUser(user: User){
+      localStorage.setItem('user', JSON.stringify(user));
       this.currentUserSource.next(user);
     }
 

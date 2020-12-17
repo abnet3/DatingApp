@@ -3,3 +3,11 @@
 
     cursor: pointer;
 }
+
+img {
+    
+ height: 50px;
+    border: 2px solid #fff;
+    display: inline;
+    margin-right: 8px;
+}
