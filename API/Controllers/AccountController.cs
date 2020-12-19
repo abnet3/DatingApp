@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using API.DTOs;
 using Microsoft.EntityFrameworkCore;
 using API.Interfaces;
+using AutoMapper;
 
 namespace API.Controllers
 {
@@ -16,8 +17,10 @@ namespace API.Controllers
     {
         private readonly DataContext _context;
         private readonly ITokenService _tokenService;
-        public AccountController(DataContext context, ITokenService tokenService)
+        private readonly IMapper _mapper;
+        public AccountController(DataContext context, ITokenService tokenService, IMapper mapper)
         {
+            _mapper = mapper;
             _tokenService = tokenService;
             _context = context;
         }
@@ -33,16 +36,25 @@ namespace API.Controllers
             if (await UserExists(registerDto.Username))
                 return BadRequest("Username is taken");
 
+            var user = _mapper.Map<AppUser>(registerDto);
+
             // using will despose the idisposable component
             using var hmac = new HMACSHA512();
 
-            var user = new AppUser
-            {
+            // var user = new AppUser
+            // {
 
-                UserName = registerDto.Username.ToLower(),
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSalt = hmac.Key
-            };
+            //     UserName = registerDto.Username.ToLower(),
+            //     PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
+            //     PasswordSalt = hmac.Key
+            // };
+        
+
+                user.UserName = registerDto.Username.ToLower();
+                user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
+                user.PasswordSalt = hmac.Key;
+                
+           
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -51,7 +63,9 @@ namespace API.Controllers
             {
 
                 username = user.UserName,
-                token = _tokenService.CreateToken(user)
+                token = _tokenService.CreateToken(user),
+                KnownAs = user.KnownAs
+                
             };
 
 
@@ -68,7 +82,7 @@ namespace API.Controllers
             .Include(p => p.Photos)
             .SingleOrDefaultAsync(x => x.UserName == loginDto.Username);
 
-                    if (user == null) return Unauthorized("Invalid username");
+            if (user == null) return Unauthorized("Invalid username");
 
             using var hmac = new HMACSHA512(user.PasswordSalt);
 
@@ -80,11 +94,12 @@ namespace API.Controllers
                 if (computeHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid Password");
             }
 
-     return new UserDto
+            return new UserDto
             {
                 username = user.UserName,
                 token = _tokenService.CreateToken(user),
-                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url
+                PhotoUrl = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
+                KnownAs = user.KnownAs
             };
         }
         private async Task<bool> UserExists(string username)

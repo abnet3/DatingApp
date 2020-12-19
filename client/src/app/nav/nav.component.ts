@@ -10,7 +10,7 @@ import { AccountService } from '../_services/account.service';
   selector: 'app-nav',
   templateUrl: './nav.component.html',
   styleUrls: ['./nav.component.css']
-})
+}) 
 export class NavComponent implements OnInit {
 
    model:any = {}
@@ -22,7 +22,7 @@ export class NavComponent implements OnInit {
 
   ngOnInit(): void {
     // this.getCurrentUser();
-    // this.currentUser$ = this.accountService.currentUser$;
+    this.currentUser$ = this.accountService.currentUser$;
 
   }
 
@@ -31,7 +31,7 @@ export class NavComponent implements OnInit {
       this.router.navigateByUrl('/members');
 
       // console.log(response);
-      this.loggedIn = true;
+      // this.loggedIn = true;
     }
     // , error => {
     //         console.log(error);
@@ -44,7 +44,7 @@ export class NavComponent implements OnInit {
   
     this.accountService.logout();
     this.router.navigateByUrl('/');
-    this.loggedIn = false;
+    // this.loggedIn = false;
   }
 
   // getCurrentUser(){
