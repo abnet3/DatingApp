@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using API.Extensions;
+using API.Helpers;
 
 namespace API.Controllers
 {
@@ -47,20 +48,47 @@ namespace API.Controllers
 
 
 
-        [HttpGet]
+        // [HttpGet]
         // [AllowAnonymous]
         // public async Task<ActionResult<IEnumerable<AppUser>>> GetUsers()
-        public async Task<ActionResult<IEnumerable<MemberDtos>>> GetUsers()
+        //
+            ////    return Ok(await _userRepository.GetUsersAsync()); 
 
+            //// var users = await _userRepository.GetUsersAsync();
+
+            //// var usersToReturn = _mapper.Map<IEnumerable <MemberDtos>>(users);
+            //// return Ok(usersToReturn);
+
+        //     var users = await _userRepository.GetMemebersAsync();
+
+        //     return Ok(users);
+
+
+        // }
+
+                  [HttpGet]
+
+        public async Task<ActionResult<IEnumerable<AppUser>>> GetUsers([FromQuery]UserParams userParams)
         {
+        
             //    return Ok(await _userRepository.GetUsersAsync()); 
 
             // var users = await _userRepository.GetUsersAsync();
 
             // var usersToReturn = _mapper.Map<IEnumerable <MemberDtos>>(users);
             // return Ok(usersToReturn);
+            var user = await _userRepository.GetUserByUsernameAsync(User.GetUserName());
 
-            var users = await _userRepository.GetMemebersAsync();
+            userParams.CurrentUsername = user.UserName;
+
+            if(string.IsNullOrEmpty(userParams.Gender))
+            
+            userParams.Gender = user.Gender == "male"? "female" : "male";
+
+            var users = await _userRepository.GetMemebersAsync(userParams);
+
+            Response.AddPaginationHeader(users.CurrentPage, users.PageSize, 
+            users.TotalCount, users.TotalPages);
 
             return Ok(users);
 

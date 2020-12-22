@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.DTOs;
 using API.Entities;
+using API.Helpers;
 using API.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -29,9 +31,41 @@ namespace API.Data
         }
 
 
-        public async Task<IEnumerable<MemberDtos>> GetMemebersAsync()
+        // public async Task<IEnumerable<MemberDtos>> GetMemebersAsync()
+        // {
+        //      return await _context.Users.ProjectTo<MemberDtos>(_mapper.ConfigurationProvider).ToListAsync();
+        // }
+
+        //after pagination and filter
+
+        public async Task<PagedList<MemberDtos>> GetMemebersAsync(UserParams userParams)
         {
-             return await _context.Users.ProjectTo<MemberDtos>(_mapper.ConfigurationProvider).ToListAsync();
+            //  var query =  _context.Users.ProjectTo<MemberDtos>(_mapper.ConfigurationProvider)
+            //                .AsNoTracking()
+            //                .AsQueryable();
+
+            var query = _context.Users.AsQueryable();
+
+            //return all users except the logged in one
+            query = query.Where(u => u.UserName != userParams.CurrentUsername);
+            query = query.Where(u => u.Gender == userParams.Gender);
+
+
+            var minDob = DateTime.Today.AddYears(-userParams.MaxAge - 1);
+            var maxDob = DateTime.Today.AddYears(-userParams.MinAge);
+
+            query = query.Where(u => u.DateofBirth >= minDob && u.DateofBirth <= maxDob);
+
+            query = userParams.OrderBy switch
+            {
+                "created" => query.OrderByDescending(u => u.Created),
+                _ => query.OrderByDescending(u => u.LastActive)
+            };
+
+
+            return await PagedList<MemberDtos>.CreateAsync(query.ProjectTo<MemberDtos>
+                   (_mapper.ConfigurationProvider).AsNoTracking(),
+                    userParams.PageNumber, userParams.PageSize);
         }
 
 
